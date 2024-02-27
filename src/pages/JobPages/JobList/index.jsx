@@ -31,7 +31,7 @@ import { GetAllUsers } from "../../../API/Auth/all";
 
 function JobList() {
   //meta title
-  document.title = "Jobs List | Skote - Vite React Admin & Dashboard Template";
+  document.title = "Jobs List | Placement Mangement";
 
   const [modal, setModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);

@@ -23,7 +23,7 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 
 const ApplyJobs = () => {
-  document.title = "Job Apply | Skote - Vite React Admin & Dashboard Template";
+  document.title = "Job Apply | Placement Mangement";
 
   const dispatch = useDispatch();
 
