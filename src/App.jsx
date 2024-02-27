@@ -10,8 +10,6 @@ import { verifyUser } from "./API/Auth/verifyUser";
 import "./assets/scss/theme.scss";
 
 const App = () => {
-  const userData = useSelector((store) => store.userData.userData);
-
   return (
     <>
       <Routes>

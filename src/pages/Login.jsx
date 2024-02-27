@@ -52,6 +52,7 @@ const Login = (props) => {
         handleLoginUser({
           data: values,
           cb: () => {
+            window.location.reload(); // Reload the page
             navigate("/dashboard");
           },
         })
