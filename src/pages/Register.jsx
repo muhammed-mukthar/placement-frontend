@@ -10,6 +10,7 @@ import {
   Label,
   Form,
   FormFeedback,
+  FormGroup,
 } from "reactstrap";
 
 // Formik Validation
@@ -33,18 +34,20 @@ const Register = (props) => {
   const dispatch = useDispatch();
 
   const validation = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
+    // enableReinitialize: use this flag when initial values need to be changed
     enableReinitialize: true,
 
     initialValues: {
       email: "",
       name: "",
       password: "",
+      department: "", // new field
     },
     validationSchema: Yup.object({
       email: Yup.string().required("Please Enter Your Email"),
-      name: Yup.string().required("Please Enter Your name"),
+      name: Yup.string().required("Please Enter Your Name"),
       password: Yup.string().required("Please Enter Your Password"),
+      department: Yup.string().required("Please Select Your Department"),
     }),
     onSubmit: (values) => {
       console.log(values, "values");
@@ -76,7 +79,7 @@ const Register = (props) => {
                     <Col className="col-7">
                       <div className="text-primary p-4">
                         <h5 className="text-primary">Free Register</h5>
-                        <p>Get your free Placement Mangement account now.</p>
+                        <p>Get your free Placement Management account now.</p>
                       </div>
                     </Col>
                     <Col className="col-5 align-self-end">
@@ -121,19 +124,15 @@ const Register = (props) => {
                           value={validation.values.email || ""}
                           invalid={
                             validation.touched.email && validation.errors.email
-                              ? true
-                              : false
                           }
                         />
-                        {validation.touched.email && validation.errors.email ? (
-                          <FormFeedback type="invalid">
-                            {validation.errors.email}
-                          </FormFeedback>
-                        ) : null}
+                        <FormFeedback type="invalid">
+                          {validation.errors.email}
+                        </FormFeedback>
                       </div>
 
                       <div className="mb-3">
-                        <Label className="form-label">name</Label>
+                        <Label className="form-label">Name</Label>
                         <Input
                           name="name"
                           type="text"
@@ -143,16 +142,13 @@ const Register = (props) => {
                           value={validation.values.name || ""}
                           invalid={
                             validation.touched.name && validation.errors.name
-                              ? true
-                              : false
                           }
                         />
-                        {validation.touched.name && validation.errors.name ? (
-                          <FormFeedback type="invalid">
-                            {validation.errors.name}
-                          </FormFeedback>
-                        ) : null}
+                        <FormFeedback type="invalid">
+                          {validation.errors.name}
+                        </FormFeedback>
                       </div>
+
                       <div className="mb-3">
                         <Label className="form-label">Password</Label>
                         <Input
@@ -165,17 +161,36 @@ const Register = (props) => {
                           invalid={
                             validation.touched.password &&
                             validation.errors.password
-                              ? true
-                              : false
                           }
                         />
-                        {validation.touched.password &&
-                        validation.errors.password ? (
-                          <FormFeedback type="invalid">
-                            {validation.errors.password}
-                          </FormFeedback>
-                        ) : null}
+                        <FormFeedback type="invalid">
+                          {validation.errors.password}
+                        </FormFeedback>
                       </div>
+
+                      <FormGroup>
+                        <Label for="department">Department</Label>
+                        <Input
+                          type="select"
+                          name="department"
+                          id="department"
+                          value={validation.values.department || ""}
+                          onChange={validation.handleChange}
+                          onBlur={validation.handleBlur}
+                          invalid={
+                            validation.touched.department &&
+                            validation.errors.department
+                          }
+                        >
+                          <option value="">Select Department</option>
+                          <option value="BCA">BCA</option>
+                          <option value="BCom">BCom</option>
+                          <option value="BTech">BTech</option>
+                        </Input>
+                        <FormFeedback>
+                          {validation.errors.department}
+                        </FormFeedback>
+                      </FormGroup>
 
                       <div className="mt-4">
                         <button
@@ -188,7 +203,7 @@ const Register = (props) => {
 
                       <div className="mt-4 text-center">
                         <p className="mb-0">
-                          By registering you agree to the Placement Mangement{" "}
+                          By registering you agree to the Placement Management{" "}
                           <Link to="#" className="text-primary">
                             Terms of Use
                           </Link>
@@ -207,8 +222,9 @@ const Register = (props) => {
                   </Link>{" "}
                 </p>
                 <p>
-                  © {new Date().getFullYear()} Placement Mangement. Crafted with{" "}
-                  <i className="mdi mdi-heart text-danger" /> by Themesbrand
+                  © {new Date().getFullYear()} Placement Management. Crafted
+                  with <i className="mdi mdi-heart text-danger" /> by
+                  Themesbrand
                 </p>
               </div>
             </Col>
