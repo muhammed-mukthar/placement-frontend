@@ -11,7 +11,7 @@ import Layout from "../components/VerticalLayout";
 
 const Router = () => {
   const userData = useSelector((store) => store.userData.userData);
-
+  console.log(userData, "userda");
   const FallbackLoadingComponent = () => {
     return (
       <div>

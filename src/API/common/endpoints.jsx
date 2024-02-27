@@ -3,6 +3,7 @@ export const apiEndPoints = {
   USER: {
     login: "/user/signin",
     register: "/user/signup",
-    list: "user/users",
+    list: "/user/users",
+    pending: "/user/pending-users",
   },
 };
