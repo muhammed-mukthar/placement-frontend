@@ -19,6 +19,16 @@ import axios from "axios";
 const JobData = ({ searchTerm }) => {
   const [modal, setModal] = useState(false);
   const [jobList, setJobList] = useState([]);
+  const [jobData, setJobData] = useState({});
+
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phoneNumber: "",
+    resume: null,
+    message: "",
+  });
+  const [formErrors, setFormErrors] = useState({});
 
   const userData = useSelector((store) => store.userData.userData);
 
@@ -40,6 +50,80 @@ const JobData = ({ searchTerm }) => {
   useEffect(() => {
     fetchData();
   }, [searchTerm]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value,
+    });
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    setFormData({
+      ...formData,
+      resume: file,
+    });
+  };
+
+  const validateForm = () => {
+    let errors = {};
+    if (!formData.fullName.trim()) {
+      errors.fullName = "Full name is required";
+    }
+    if (!formData.email.trim()) {
+      errors.email = "Email is required";
+    } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      errors.email = "Invalid email format";
+    }
+    if (!formData.phoneNumber.trim()) {
+      errors.phoneNumber = "Phone number is required";
+    }
+    if (!formData.resume) {
+      errors.resume = "Resume is required";
+    }
+
+    // Add more validation checks if needed
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.fullName);
+      formDataToSend.append("email", formData.email);
+      formDataToSend.append("phone", formData.phoneNumber);
+      formDataToSend.append("file", formData.resume);
+      formDataToSend.append("message", formData.message);
+
+      try {
+        const response = await axios.put(
+          `${import.meta.env.VITE__APP_API}/job/apply/${jobData._id}`,
+          formDataToSend,
+          {
+            headers: {
+              Authorization: `Bearer ${userData.jwtToken}`,
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        console.log("Application submitted successfully:", response.data);
+        fetchData();
+        setModal(false);
+      } catch (error) {
+        console.error("Error submitting application:", error);
+      }
+    }
+  };
+
+  const selectJob = (details) => {
+    setModal(true);
+    setJobData(details);
+  };
   return (
     <React.Fragment>
       <Row>
@@ -83,7 +167,7 @@ const JobData = ({ searchTerm }) => {
                 <div className="mt-4 hstack gap-2">
                   <Link
                     to="#applyJobs"
-                    onClick={() => setModal(true)}
+                    onClick={() => selectJob(item)}
                     className="btn btn-soft-primary w-100"
                   >
                     Apply Now
@@ -112,81 +196,125 @@ const JobData = ({ searchTerm }) => {
             Apply For This Job
           </ModalHeader>
           <ModalBody>
-            <Row>
-              <Col lg={12}>
-                <div className="mb-3">
-                  <Label htmlFor="fullnameInput" className="form-label">
-                    Full Name
-                  </Label>
-                  <Input
-                    type="text"
-                    className="form-control"
-                    id="fullnameInput"
-                    placeholder="Enter your name"
-                  />
-                </div>
-              </Col>
-              <Col lg={6}>
-                <div className="mb-3">
-                  <Label htmlFor="emailInput" className="form-label">
-                    Email
-                  </Label>
-                  <Input
-                    type="email"
-                    className="form-control"
-                    id="emailInput"
-                    placeholder="Enter your email"
-                  />
-                </div>
-              </Col>
-              <Col lg={6}>
-                <div className="mb-3">
-                  <Label htmlFor="phoneNumberInput" className="form-label">
-                    Phone Number
-                  </Label>
-                  <Input
-                    type="email"
-                    className="form-control"
-                    id="phoneNumberInput"
-                    placeholder="Enter your number"
-                  />
-                </div>
-              </Col>
-              <Col lg={12}>
-                <div className="mb-3">
-                  <Label htmlFor="uploadResume" className="form-label">
-                    Upload Resume
-                  </Label>
-                  <Input
-                    type="file"
-                    className="form-control"
-                    id="uploadResume"
-                    placeholder="Upload resume"
-                  />
-                </div>
-              </Col>
-              <Col lg={12}>
-                <div className="mb-4">
-                  <Label htmlFor="messageInput" className="form-label">
-                    Message
-                  </Label>
-                  <textarea
-                    className="form-control"
-                    id="messageInput"
-                    rows="3"
-                    placeholder="Enter your message"
-                  ></textarea>
-                </div>
-              </Col>
-              <Col lg={12}>
-                <div className="text-end">
-                  <button className="btn btn-success me-1">
-                    Send Application <i className="bx bx-send align-middle"></i>
-                  </button>
-                  <button className="btn btn-outline-secondary">Cancel</button>
-                </div>
-              </Col>
-            </Row>
+            <Form onSubmit={handleSubmit}>
+              <Row>
+                {/* Full Name */}
+                <Col lg={12}>
+                  <div className="mb-3">
+                    <Label htmlFor="fullnameInput" className="form-label">
+                      Full Name
+                    </Label>
+                    <Input
+                      type="text"
+                      className="form-control"
+                      id="fullnameInput"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      placeholder="Enter your name"
+                    />
+                    {formErrors.fullName && (
+                      <div className="text-danger">{formErrors.fullName}</div>
+                    )}
+                  </div>
+                </Col>
+                {/* Email */}
+                <Col lg={6}>
+                  <div className="mb-3">
+                    <Label htmlFor="emailInput" className="form-label">
+                      Email
+                    </Label>
+                    <Input
+                      type="email"
+                      className="form-control"
+                      id="emailInput"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                    />
+                    {formErrors.email && (
+                      <div className="text-danger">{formErrors.email}</div>
+                    )}
+                  </div>
+                </Col>
+                {/* Phone Number */}
+                <Col lg={6}>
+                  <div className="mb-3">
+                    <Label htmlFor="phoneNumberInput" className="form-label">
+                      Phone Number
+                    </Label>
+                    <Input
+                      type="text"
+                      className="form-control"
+                      id="phoneNumberInput"
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      placeholder="Enter your number"
+                    />
+                    {formErrors.phoneNumber && (
+                      <div className="text-danger">
+                        {formErrors.phoneNumber}
+                      </div>
+                    )}
+                  </div>
+                </Col>
+                {/* Upload Resume */}
+                <Col lg={12}>
+                  <div className="mb-3">
+                    <Label htmlFor="uploadResume" className="form-label">
+                      Upload Resume
+                    </Label>
+                    <Input
+                      type="file"
+                      className="form-control"
+                      id="uploadResume"
+                      name="resume"
+                      onChange={handleFileChange}
+                      placeholder="Upload resume"
+                    />
+                    {formErrors.resume && (
+                      <div className="text-danger">{formErrors.resume}</div>
+                    )}
+                  </div>
+                </Col>
+
+                {/* Message */}
+                <Col lg={12}>
+                  <div className="mb-4">
+                    <Label htmlFor="messageInput" className="form-label">
+                      Message
+                    </Label>
+                    <textarea
+                      className="form-control"
+                      id="messageInput"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      rows="3"
+                      placeholder="Enter your message"
+                    ></textarea>
+                  </div>
+                </Col>
+                {/* Submit Button */}
+                <Col lg={12}>
+                  <div className="text-end">
+                    <button type="submit" className="btn btn-success me-1">
+                      Send Application{" "}
+                      <i className="bx bx-send align-middle"></i>
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setModal(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </Col>
+              </Row>
+            </Form>
           </ModalBody>
         </div>
       </Modal>
