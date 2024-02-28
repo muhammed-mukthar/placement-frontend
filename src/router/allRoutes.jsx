@@ -5,6 +5,7 @@ import DashBoard from "../pages/DashBoard";
 import JobList from "../pages/JobPages/JobList";
 import userManagement from "../pages/Admin/userManagement";
 import jobListing from "../pages/Employee/jobListing";
+import StudentJobListing from "../pages/Student/StudentJobListing";
 
 export const authRoutes = [
   {
@@ -17,6 +18,7 @@ export const authRoutes = [
   },
   { path: "/user-list", component: userManagement },
   { path: "/job-management", component: jobListing },
+  { path: "/job-listing", component: StudentJobListing },
 ];
 
 export const loginRoutes = [

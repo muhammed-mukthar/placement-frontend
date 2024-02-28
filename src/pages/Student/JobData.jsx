@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Card,
   CardBody,
@@ -13,38 +13,37 @@ import {
   Pagination,
 } from "reactstrap";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axios from "axios";
 
-//import imagdit.svg";
-
-const JobData = () => {
+const JobData = ({ searchTerm }) => {
   const [modal, setModal] = useState(false);
+  const [jobList, setJobList] = useState([]);
 
-  const jobsGridData = [
-    {
-      id: 2,
-      title: "Product Designer",
-    },
-    {
-      id: 3,
-      title: "Marketing Director",
-    },
-    {
-      id: 4,
-      title: "Project Manager",
-    },
-    {
-      id: 5,
-      title: "HTML Developer",
-    },
-    {
-      id: 6,
-      title: "Business Associate",
-    },
-  ];
+  const userData = useSelector((store) => store.userData.userData);
+
+  let fetchData = async () => {
+    const response = await axios.get(
+      `${import.meta.env.VITE__APP_API}/job/all-job?search=${searchTerm}`,
+      {
+        headers: {
+          Authorization: `Bearer ${userData.jwtToken}`,
+        },
+      }
+    );
+
+    if (response.data) {
+      setJobList(response.data);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [searchTerm]);
   return (
     <React.Fragment>
       <Row>
-        {(jobsGridData || []).map((item, key) => (
+        {(jobList || []).map((item, key) => (
           <Col xl={3} md={6} key={key}>
             <Card>
               <CardBody>
@@ -53,48 +52,35 @@ const JobData = () => {
                     <i className="uil uil-heart-alt fs-18"></i>
                   </Link>
                 </div>
-                <img src={item.img} alt="" height="50" className="mb-3" />
                 <h5 className="fs-17 mb-2">
                   <Link to="/job-details" className="text-dark">
-                    {item.title}
+                    {item?.jobTitle}
                   </Link>{" "}
-                  <small className="text-muted fw-normal">(0-2 Yrs Exp.)</small>
+                  <small className="text-muted fw-normal">
+                    {item?.experience}
+                  </small>
                 </h5>
                 <ul className="list-inline mb-0">
                   <li className="list-inline-item">
-                    <p className="text-muted fs-14 mb-1">
-                      Placement Mangement Technology Pvt.Ltd
-                    </p>
+                    <p className="text-muted fs-14 mb-1">{item?.companyName}</p>
                   </li>{" "}
                   <li className="list-inline-item">
                     <p className="text-muted fs-14 mb-0">
-                      <i className="mdi mdi-map-marker"></i> California
+                      <i className="mdi mdi-map-marker"></i> {item?.location}
                     </p>
                   </li>
                   <li className="list-inline-item">
                     <p className="text-muted fs-14 mb-0">
-                      <i className="uil uil-wallet"></i> $250 - $800 / month
+                      <i className="uil uil-wallet"></i> {item?.lastDate}
                     </p>
                   </li>
                 </ul>
                 <div className="mt-3 hstack gap-2">
                   <span className="badge rounded-1 badge-soft-success">
-                    Full Time
-                  </span>
-                  <span className="badge rounded-1 badge-soft-warning">
-                    Urgent
-                  </span>
-                  <span className="badge rounded-1 badge-soft-info">
-                    Private
+                    {item?.status}{" "}
                   </span>
                 </div>
                 <div className="mt-4 hstack gap-2">
-                  <Link
-                    to="/job-details"
-                    className="btn btn-soft-success w-100"
-                  >
-                    View Profile
-                  </Link>
                   <Link
                     to="#applyJobs"
                     onClick={() => setModal(true)}
@@ -107,59 +93,6 @@ const JobData = () => {
             </Card>
           </Col>
         ))}
-      </Row>
-
-      <Row className="justify-content-between align-items-center mb-3">
-        <div className="col-auto me-auto">
-          <p className="text-muted mb-0">
-            Showing <b>1</b> to <b>12</b> of <b>45</b> entries
-          </p>
-        </div>
-        <div className="col-auto">
-          <Card className="d-inline-block ms-auto mb-0">
-            <CardBody className="p-2">
-              <nav aria-label="Page navigation example" className="mb-0">
-                <ul className="pagination mb-0">
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      <span aria-hidden="true">&laquo;</span>
-                    </Link>
-                  </li>
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      1
-                    </Link>
-                  </li>
-                  <li className="page-item active">
-                    <Link className="page-link" to="#">
-                      2
-                    </Link>
-                  </li>
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      3
-                    </Link>
-                  </li>
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      ...
-                    </Link>
-                  </li>
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      12
-                    </Link>
-                  </li>
-                  <li className="page-item">
-                    <Link className="page-link" to="#">
-                      <span aria-hidden="true">&raquo;</span>
-                    </Link>
-                  </li>
-                </ul>
-              </nav>
-            </CardBody>
-          </Card>
-        </div>
       </Row>
 
       {/* Modal */}
