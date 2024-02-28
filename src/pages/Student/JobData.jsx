@@ -111,6 +111,8 @@ const JobData = ({ searchTerm }) => {
             },
           }
         );
+        toast.success("Application submitted successfully");
+
         console.log("Application submitted successfully:", response.data);
         fetchData();
         setModal(false);
