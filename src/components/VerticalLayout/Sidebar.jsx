@@ -60,9 +60,9 @@ const Sidebar = (props) => {
                 <ul className="metismenu list-unstyled" id="side-menu">
                   <li className="menu-title">Menu </li>
                   <li>
-                    <Link to="/pending" className="">
+                    <Link to="/job-management" className="">
                       <i className="bx bx-chat"></i>
-                      <span>Pending User</span>
+                      <span>Job Management</span>
                     </Link>
                   </li>
                 </ul>
