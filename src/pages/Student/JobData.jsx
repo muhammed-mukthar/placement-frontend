@@ -15,6 +15,7 @@ import {
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 const JobData = ({ searchTerm }) => {
   const [modal, setModal] = useState(false);
@@ -99,6 +100,7 @@ const JobData = ({ searchTerm }) => {
       formDataToSend.append("phone", formData.phoneNumber);
       formDataToSend.append("file", formData.resume);
       formDataToSend.append("message", formData.message);
+      formDataToSend.append("jobId", jobData._id);
 
       try {
         const response = await axios.put(
@@ -112,10 +114,10 @@ const JobData = ({ searchTerm }) => {
           }
         );
         toast.success("Application submitted successfully");
+        setModal(false);
 
         console.log("Application submitted successfully:", response.data);
         fetchData();
-        setModal(false);
       } catch (error) {
         console.error("Error submitting application:", error);
       }

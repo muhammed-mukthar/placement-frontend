@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, Fragment } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import TableContainer from "../../components/Common/TableContainer";
 import {
   Card,
@@ -23,7 +23,7 @@ import { useFormik } from "formik";
 
 // Import Breadcrumb
 import Breadcrumbs from "/src/components/Common/Breadcrumb";
-import DeleteModal from "/src/components/Common/DeleteModal";
+import DeleteModal from "../../components/Common/ApplicantModal";
 
 import { isEmpty } from "lodash";
 
@@ -32,9 +32,11 @@ import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 
-const jobListing = (props) => {
+const ViewApplicants = (props) => {
   const userData = useSelector((store) => store.userData.userData);
   const Navigate = useNavigate();
+  let { jobId } = useParams();
+
   // meta title
   document.title = "User List | Skote - Vite React Admin & Dashboard Template";
   const createUser = async (data) => {
@@ -75,9 +77,10 @@ const jobListing = (props) => {
       fetchData();
     }
   };
-  const deleteJobHandler = async (id) => {
-    const response = await axios.delete(
-      `${import.meta.env.VITE__APP_API}/job/placements/${id}`,
+  const deleteJobHandler = async (data) => {
+    const response = await axios.post(
+      `${import.meta.env.VITE__APP_API}/job/select-applicant`,
+      { ...data },
       {
         headers: {
           Authorization: `Bearer ${userData.jwtToken}`,
@@ -140,7 +143,7 @@ const jobListing = (props) => {
 
   let fetchData = async () => {
     const response = await axios.get(
-      `${import.meta.env.VITE__APP_API}/job/employer-jobs`,
+      `${import.meta.env.VITE__APP_API}/job/applied-users/${jobId}`,
       {
         headers: {
           Authorization: `Bearer ${userData.jwtToken}`,
@@ -149,8 +152,8 @@ const jobListing = (props) => {
     );
     console.log(response, "res");
 
-    if (response.data) {
-      setUserList(response.data);
+    if (response.data.data) {
+      setUserList(response.data.data);
     }
   };
   useEffect(() => {
@@ -232,7 +235,7 @@ const jobListing = (props) => {
   const handleDeleteUser = () => {
     console.log(contact);
     if (contact && contact._id) {
-      deleteJobHandler(contact._id);
+      deleteJobHandler(contact);
     }
     setContact("");
 
@@ -244,8 +247,31 @@ const jobListing = (props) => {
     toggle();
   };
 
-  const keyField = "id";
-  console.log(users, "users");
+  const handleDownload = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:5000/job/download/${id}`);
+
+      // Assuming the response is a Blob (binary data)
+      const blob = await response.blob();
+
+      // Create a temporary URL for the blob
+      const url = window.URL.createObjectURL(new Blob([blob]));
+
+      // Create a temporary <a> element to trigger the download
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "resume.pdf");
+      document.body.appendChild(link);
+      link.click();
+
+      // Clean up
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+    }
+  };
+
   return (
     <React.Fragment>
       <DeleteModal
@@ -256,7 +282,7 @@ const jobListing = (props) => {
       <div className="page-content">
         <Container fluid>
           {/* Render Breadcrumbs */}
-          <Breadcrumbs title="jobs" breadcrumbItem="Job List" />
+          <Breadcrumbs title="jobs" breadcrumbItem="Job Applicants" />
           <div style={{ display: "flex", flexDirection: "column" }}>
             <Col sm="11">
               <div className="text-sm-end mt-auto">
@@ -266,10 +292,11 @@ const jobListing = (props) => {
                   type="button"
                   color="primary"
                   className="btn mb-2 me-2"
-                  onClick={handleUserClicks}
+                  onClick={() => {
+                    Navigate("/job-management");
+                  }}
                 >
-                  <i className="mdi mdi-plus-circle-outline me-1" />
-                  Create New Job Posting
+                  Go Back
                 </Button>
               </div>
             </Col>
@@ -282,18 +309,11 @@ const jobListing = (props) => {
                   <Table bordered hover>
                     <thead className="table-light table-nowrap">
                       <tr>
-                        <th>Job Title</th>
-                        <th>Company Name</th>
-                        <th>Location</th>
-                        <th>Experience</th>
-                        <th>Position</th>
-                        <th>Posted Date</th>
-                        <th>Last Date</th>
-                        <th>Department</th>
-                        <th>Status</th>
-                        <th>Applicants</th>
-
-                        <th>Action</th>
+                        <th>email</th>
+                        <th>phone</th>
+                        <th>message</th>
+                        <th>resume</th>
+                        <th>Select</th>
                       </tr>
                     </thead>
 
@@ -301,72 +321,36 @@ const jobListing = (props) => {
                       {users &&
                         users.map((job) => (
                           <tr key={job._id}>
-                            <td>{job.jobTitle}</td>
-                            <td>{job.companyName}</td>
-                            <td>{job.location}</td>
-                            <td>{job.experience}</td>
-                            <td>{job.position}</td>
-                            <td>{job.postedDate}</td>
-                            <td>{job.lastDate}</td>
-                            <td>{job.department}</td>{" "}
-                            <td>
-                              {job.status === "Open" ? (
-                                <span className="badge bg-success">Open</span>
-                              ) : (
-                                <span className="badge bg-danger">Closed</span>
-                              )}
-                            </td>
+                            <td>{job.email}</td>
+                            <td>{job.phone}</td>
+                            <td>{job.message}</td>
                             <td>
                               {" "}
                               <button
                                 onClick={() => {
-                                  Navigate(`view-applicants/${job._id}`);
+                                  handleDownload(job._id);
                                 }}
-                                className="btn btn-success"
+                                className="btn btn-info"
                               >
-                                View Applicants
-                              </button>
+                                download Resume
+                              </button>{" "}
                             </td>
                             <td>
                               {" "}
-                              <div className="d-flex gap-3">
-                                <Link
-                                  to="#"
-                                  className="text-success"
-                                  onClick={() => {
-                                    handleJobClick(job);
-                                  }}
-                                >
-                                  <i
-                                    className="mdi mdi-pencil font-size-18"
-                                    id="edittooltip"
-                                  />
-                                  <UncontrolledTooltip
-                                    placement="top"
-                                    target="edittooltip"
-                                  >
-                                    Edit
-                                  </UncontrolledTooltip>
-                                </Link>
-                                <Link
-                                  to="#"
-                                  className="text-danger"
+                              {job.selected ? (
+                                <span className="badge bg-success">
+                                  Selected
+                                </span>
+                              ) : (
+                                <button
                                   onClick={() => {
                                     onClickDelete(job);
                                   }}
+                                  className="btn btn-success"
                                 >
-                                  <i
-                                    className="mdi mdi-delete font-size-18"
-                                    id="deletetooltip"
-                                  />
-                                  <UncontrolledTooltip
-                                    placement="top"
-                                    target="deletetooltip"
-                                  >
-                                    Delete
-                                  </UncontrolledTooltip>
-                                </Link>
-                              </div>
+                                  Select Applicant
+                                </button>
+                              )}
                             </td>
                           </tr>
                         ))}
@@ -563,4 +547,4 @@ const jobListing = (props) => {
   );
 };
 
-export default jobListing;
+export default ViewApplicants;

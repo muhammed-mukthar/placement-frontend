@@ -50,6 +50,12 @@ const Sidebar = (props) => {
                       <span>Jobs</span>
                     </Link>
                   </li>
+                  <li>
+                    <Link to="/applied-jobs" className="">
+                      <i className="bx bx-chat"></i>
+                      <span>Applied Jobs</span>
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </SimpleBar>
